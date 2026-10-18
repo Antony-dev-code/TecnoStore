@@ -8,7 +8,7 @@ El sistema permitirá controlar el inventario de celulares, registrar clientes, 
 
 Este documento está organizado por módulos que coinciden con los temas que has estudiado, para que puedas ver directamente qué conocimiento aplicas en cada parte del sistema.
 
-**Estimado total del proyecto:** 70 – 90 horas de desarrollo.
+**Estimado total del proyecto:** 72 – 96 horas de desarrollo.
 
 ---
 
@@ -29,10 +29,13 @@ Este documento está organizado por módulos que coinciden con los temas que has
 - **ConexionDB**: Clase que abre y cierra la conexión a MySQL usando JDBC.
 - **Validador**: Clase utilitaria que verifica que los datos ingresados sean correctos.
 - **ReporteUtils**: Clase utilitaria que genera los reportes usando Stream API.
-- **ArchivoUtils**: Clase utilitaria que escribe el archivo de texto con el resumen de ventas.
+- **ArchivoUtils**: Clase utilitaria que escribe y lee el archivo binario serializado `.dat` con el resumen de ventas usando ObjectOutputStream y ObjectInputStream.
 - **FactoryCelular**: Clase que crea objetos Celular siguiendo el patrón de diseño Factory.
 - **Main**: Clase principal que arranca el sistema y muestra el menú de consola.
 - **tecnostore_db**: Base de datos MySQL que almacena toda la información del sistema.
+- **ConsolaUtils**: Clase utilitaria con métodos estáticos para dar formato estético a la consola (bordes, tablas, títulos).
+- **TecnoStoreAnt**: Nombre de la base de datos MySQL normalizada del sistema.
+- **Persona**: Tabla base en la base de datos de la que heredan Cliente y Empleado.
 
 ---
 
@@ -122,6 +125,8 @@ Este documento está organizado por módulos que coinciden con los temas que has
 7. SI ocurre un error durante el guardado de la venta, ENTONCES EL GestorVentas DEBE revertir todos los cambios (rollback) y mostrar el mensaje "Error al registrar la venta, no se realizaron cambios".
 8. CUANDO la venta finaliza con éxito, EL Sistema DEBE mostrar un comprobante en consola con: nombre del cliente, lista de celulares comprados con cantidad y subtotal, total sin IVA, valor del IVA y total con IVA.
 9. EL GestorVentas DEBE delegar el acceso a base de datos a VentaDAO y no debe contener instrucciones directas de acceso a consola dentro de la lógica de cálculo.
+10. MIENTRAS el empleado agrega ítems a una misma venta, EL GestorVentas DEBE llevar un registro temporal del stock comprometido por cada celular en la sesión actual; SI el empleado intenta agregar un segundo pedido del mismo celular en la misma transacción y la suma total supera el stock disponible, ENTONCES EL Sistema DEBE mostrar el mensaje "No hay suficiente stock para este celular en esta venta (disponible: X, ya solicitado: Y)" y no agregar el ítem.
+11. CUANDO la venta se confirma, EL GestorVentas DEBE verificar nuevamente que el stock de cada celular en la base de datos sea suficiente para cubrir la cantidad total acumulada en la transacción; SI algún celular ya no tiene stock suficiente al momento del commit, ENTONCES EL GestorVentas DEBE ejecutar rollback y mostrar el mensaje "No se pudo completar la venta: stock insuficiente al confirmar".
 
 ---
 
@@ -143,22 +148,24 @@ Este documento está organizado por módulos que coinciden con los temas que has
 
 ---
 
-### Requerimiento 6: Persistencia en archivos de texto
+### Requerimiento 6: Persistencia en archivos
 
-**Temas aplicados:** Módulo 5 (manejo de archivos, try-with-resources), Módulo 2 (listas)
+**Temas aplicados:** Módulo 5 (serialización de objetos, try-with-resources), Módulo 2 (listas)
 
-**Historia de usuario:** Como dueño de TecnoStore, quiero que el sistema genere automáticamente un archivo de texto con el resumen de ventas, para tener un respaldo físico del reporte.
+**Historia de usuario:** Como dueño de TecnoStore, quiero que el sistema genere automáticamente un archivo serializado con el resumen de ventas y permita leerlo desde el menú, para tener un respaldo estructurado del reporte.
 
 **Estimado:** 4 – 6 horas
 
 #### Criterios de aceptación
 
-1. CUANDO el usuario selecciona la opción "Generar reporte de ventas" en el menú, EL ArchivoUtils DEBE crear o sobreescribir el archivo "reporte_ventas.txt" en el directorio de trabajo actual del proceso Java con el resumen de todas las ventas registradas en orden de registro.
-2. EL archivo "reporte_ventas.txt" DEBE contener: la fecha de generación en formato DD/MM/YYYY HH:MM:SS, el listado de ventas con la fecha de cada venta en formato DD/MM/YYYY, el nombre del cliente y el total con IVA expresado con exactamente 2 decimales, y el gran total recaudado con exactamente 2 decimales al final.
-3. EL ArchivoUtils DEBE usar try-with-resources al manejar el archivo para garantizar que el recurso se cierre correctamente aunque ocurra un error.
-4. SI no hay ventas registradas al momento de generar el reporte, ENTONCES EL ArchivoUtils DEBE crear el archivo indicando que no hay ventas registradas y mostrar el mensaje "Archivo reporte_ventas.txt generado correctamente" con la ruta absoluta del archivo.
-5. SI ocurre un error al escribir el archivo, ENTONCES EL ArchivoUtils DEBE mostrar el mensaje "No se pudo generar el archivo de reporte", imprimir la traza del error en la consola de errores y continuar la ejecución del programa sin terminar.
-6. CUANDO el archivo se genera con éxito, EL Sistema DEBE mostrar el mensaje "Archivo reporte_ventas.txt generado correctamente" seguido de la ruta absoluta del archivo generado.
+1. CUANDO el usuario selecciona la opción "Generar reporte de ventas" en el menú, EL ArchivoUtils DEBE crear o sobreescribir el archivo "reporte_ventas.dat" en el directorio de trabajo actual usando serialización de objetos Java (ObjectOutputStream).
+2. EL archivo "reporte_ventas.dat" DEBE contener una lista serializada de objetos Venta con todos sus datos, incluyendo la fecha en formato DD/MM/YYYY HH:MM:SS al momento de la generación.
+3. EL ArchivoUtils DEBE usar try-with-resources con ObjectOutputStream y FileOutputStream para garantizar el cierre correcto del archivo aunque ocurra un error.
+4. EL ArchivoUtils DEBE proveer también un método `leerReporte()` que use ObjectInputStream para deserializar el archivo "reporte_ventas.dat" y retornar la lista de Venta leída; CUANDO el usuario seleccione "Ver reporte" en el menú, EL Sistema DEBE llamar este método y mostrar el contenido en consola con formato estético (tabla con bordes).
+5. SI no hay ventas registradas al momento de generar el reporte, ENTONCES EL ArchivoUtils DEBE serializar una lista vacía, escribir el archivo igualmente y mostrar el mensaje "Reporte generado: no hay ventas registradas aún".
+6. SI ocurre un error al escribir o leer el archivo, ENTONCES EL ArchivoUtils DEBE mostrar el mensaje "No se pudo acceder al archivo de reporte", imprimir la traza del error en la consola de errores y continuar sin terminar el programa.
+7. CUANDO el archivo se genera con éxito, EL Sistema DEBE mostrar el mensaje "Archivo reporte_ventas.dat generado correctamente" seguido de la ruta absoluta del archivo.
+8. LA clase Venta, la clase Cliente, la clase Celular y la clase ItemVenta DEBEN implementar la interfaz java.io.Serializable para poder ser serializadas.
 
 ---
 
@@ -172,12 +179,20 @@ Este documento está organizado por módulos que coinciden con los temas que has
 
 #### Criterios de aceptación
 
-1. EL ConexionDB DEBE conectarse a la base de datos tecnostore_db en MySQL usando JDBC con los parámetros: host, puerto, usuario y contraseña.
-2. CADA clase DAO (CelularDAO, ClienteDAO, VentaDAO) DEBE implementar las operaciones básicas: insertar, buscar por id, listar todos, actualizar y eliminar, usando PreparedStatement para evitar inyección SQL.
-3. EL ConexionDB DEBE implementar el patrón Singleton para garantizar que solo haya una conexión activa durante toda la ejecución.
-4. CUANDO se ejecuta el script tecnostore_db.sql, EL Sistema DEBE crear la base de datos tecnostore_db con las tablas: celulares, clientes, ventas y detalle_ventas con sus respectivas llaves primarias y foráneas.
-5. CADA clase DAO DEBE manejar las excepciones de tipo SQLException usando bloques try-catch y mostrar mensajes de error comprensibles para el desarrollador.
-6. EL CelularDAO, EL ClienteDAO y EL VentaDAO DEBEN depender de la interfaz de ConexionDB y no de su implementación concreta, aplicando el Principio de Inversión de Dependencias (DIP de SOLID).
+1. EL ConexionDB DEBE conectarse a la base de datos **TecnoStoreAnt** en MySQL usando JDBC con los parámetros leídos desde un archivo de configuración (host, puerto, usuario, contraseña).
+2. EL script "TecnoStoreAnt.sql" DEBE crear la base de datos con las siguientes tablas normalizadas y sus respectivas llaves primarias y foráneas:
+   - **persona** (id INT AUTO_INCREMENT PK, nombre VARCHAR(100), identificacion VARCHAR(20) UNIQUE, telefono VARCHAR(15), correo VARCHAR(255))
+   - **empleado** (id INT PK, FK → persona.id, tipo ENUM('CAJERO','BODEGUERO','ADMINISTRADOR'))
+   - **cliente** (id INT PK, FK → persona.id, rut VARCHAR(20) NULL)
+   - **precio** (id INT AUTO_INCREMENT PK, nombre VARCHAR(100), valor DECIMAL(15,2))
+   - **marca** (id INT AUTO_INCREMENT PK, nombre VARCHAR(100) UNIQUE)
+   - **celular** (id INT AUTO_INCREMENT PK, modelo VARCHAR(100), id_marca_fk INT FK → marca.id, sistema_operativo ENUM('ANDROID','IOS'), gama ENUM('ALTA','MEDIA','BAJA'), id_precio_fk INT FK → precio.id, stock INT DEFAULT 0)
+   - **venta** (id INT AUTO_INCREMENT PK, id_cliente_fk INT FK → cliente.id, fecha DATETIME, total DECIMAL(15,2), id_empleado_fk INT FK → empleado.id)
+   - **detalle_venta** (id INT AUTO_INCREMENT PK, id_venta_fk INT FK → venta.id, id_celular_fk INT FK → celular.id, cantidad INT, subtotal DECIMAL(15,2))
+3. CADA clase DAO DEBE implementar las operaciones básicas usando PreparedStatement para evitar inyección SQL.
+4. LA herencia de persona en empleado y cliente DEBE implementarse en Java cargando primero los datos de persona y luego los datos de la subclase en una sola operación coordinada por el DAO correspondiente.
+5. CADA clase DAO DEBE manejar las excepciones de tipo SQLException con bloques try-catch y mostrar mensajes comprensibles.
+6. CUANDO se ejecute el script TecnoStoreAnt.sql en MySQL Workbench, DEBE crear la base de datos completa con datos de prueba: 5 clientes, 3 empleados (1 cajero, 1 bodeguero, 1 administrador), 10 modelos de celular con 30 unidades de stock cada uno, al menos 2 ventas de prueba con sus detalles.
 
 ---
 
@@ -185,18 +200,18 @@ Este documento está organizado por módulos que coinciden con los temas que has
 
 **Temas aplicados:** Módulo 3 (SOLID, patrones creacionales, estructurales y de comportamiento)
 
-**Historia de usuario:** Como desarrollador estudiante, quiero que el código aplique los principios y patrones que he estudiado, para consolidar lo aprendido en el proyecto real.
+**Historia de usuario:** Como desarrollador estudiante, quiero que el código aplique los principios SOLID y al menos un patrón de diseño recomendado, para consolidar lo aprendido sin sobre-ingeniería.
 
 **Estimado:** 6 – 8 horas (distribuido en toda la implementación)
 
 #### Criterios de aceptación
 
-1. EL FactoryCelular DEBE implementar el patrón Factory Method con un método estático que reciba los datos del celular y retorne un objeto Celular correctamente construido.
-2. EL Sistema DEBE aplicar el Principio de Responsabilidad Única (SRP): cada clase debe tener una sola razón para cambiar (los Gestores manejan lógica, los DAOs manejan base de datos, los Utils generan reportes/archivos).
-3. EL Sistema DEBE aplicar el Principio Abierto/Cerrado (OCP): las clases de reportes deben poder extenderse para nuevos tipos de reporte sin modificar el código existente.
-4. EL Sistema DEBE aplicar el Principio de Sustitución de Liskov (LSP): si se usan clases que heredan de una clase base, los objetos hijos deben poder reemplazar a los padres sin romper el funcionamiento.
-5. DONDE se requiera calcular descuentos o precios especiales, EL Sistema DEBE implementar el patrón Strategy para que el algoritmo de cálculo sea intercambiable sin modificar el GestorVentas.
-6. EL Sistema DEBE aplicar encapsulamiento en todas las clases del modelo: todos los atributos deben ser privados y accesibles solo mediante getters y setters con validación básica.
+1. EL Sistema DEBE implementar obligatoriamente el patrón Singleton en ConexionDB: solo debe existir una instancia de conexión durante toda la ejecución del programa.
+2. SE RECOMIENDA implementar el patrón Factory en FactoryCelular para centralizar la construcción de objetos Celular; si se implementa, DEBE proveer un método estático que reciba los datos y retorne un Celular construido correctamente.
+3. SE RECOMIENDA implementar el patrón Strategy para el cálculo de descuentos o precios especiales; si se implementa, DEBE usar una interfaz EstrategiaDescuento con implementaciones intercambiables (SinDescuento, DescuentoPorcentaje), de modo que GestorVentas no necesite modificarse para cambiar la forma de calcular.
+4. EL Sistema DEBE aplicar el Principio de Responsabilidad Única (SRP): los Gestores manejan lógica de negocio, los DAOs manejan base de datos, los Utils manejan archivos y reportes.
+5. EL Sistema DEBE aplicar el Principio Abierto/Cerrado (OCP): las clases de reportes deben poder extenderse para nuevos tipos sin modificar el código existente.
+6. EL Sistema DEBE aplicar encapsulamiento en todas las clases del modelo: atributos privados, accesibles solo mediante getters y setters.
 
 ---
 
@@ -234,6 +249,24 @@ Este documento está organizado por módulos que coinciden con los temas que has
 
 ---
 
+### Requerimiento 11: Presentación estética en consola
+
+**Temas aplicados:** Módulo 1 (cadenas y conversiones), Módulo 4 (utilidades de texto)
+
+**Historia de usuario:** Como usuario del sistema, quiero que los menús, tablas y mensajes en consola tengan un formato visual claro y ordenado, para que el uso del sistema sea cómodo y fácil de leer.
+
+**Estimado:** 3 – 4 horas
+
+#### Criterios de aceptación
+
+1. EL Sistema DEBE mostrar cada menú enmarcado con bordes ASCII (líneas de guiones o ═) con el título centrado, los ítems numerados y separadores entre secciones.
+2. CUANDO el Sistema muestra una lista de celulares, clientes o ventas, DEBE presentarlos en formato de tabla con columnas alineadas usando espaciado fijo o String.format(), con una línea de encabezado y una línea separadora de guiones.
+3. CUANDO el Sistema muestra el comprobante de una venta, DEBE incluir bordes, separadores entre secciones (cliente, ítems, totales) y alinear los valores monetarios a la derecha.
+4. EL Sistema DEBE usar saltos de línea entre secciones para evitar que los bloques de información queden pegados visualmente.
+5. EL Sistema DEBE centralizar toda la lógica de formato en una clase utilitaria `ConsolaUtils` con métodos estáticos como `imprimirTitulo(String titulo)`, `imprimirLinea()`, `imprimirTablaEncabezado(String... columnas)` y `imprimirFila(String... valores)`.
+
+---
+
 ## Resumen de estimación por módulo
 
 | Requerimiento | Temas principales | Horas estimadas |
@@ -248,4 +281,5 @@ Este documento está organizado por módulos que coinciden con los temas que has
 | 8. Patrones y SOLID | Módulo 3 | 6 – 8 h |
 | 9. Concurrencia básica | Módulo 4 | 3 – 4 h |
 | 10. Entregables | Todos | 4 – 6 h |
-| **Total** | | **69 – 92 horas** |
+| 11. Consola estética | Módulo 1 | 3 – 4 h |
+| **Total** | | **72 – 96 horas** |
