@@ -115,7 +115,7 @@ public class VentaDAO {
                          + "JOIN persona  p_c ON cl.id            = p_c.id "
                          + "JOIN empleado em  ON v.id_empleado_fk = em.id "
                          + "JOIN persona  p_e ON em.id            = p_e.id "
-                         + "ORDER BY v.fecha DESC";
+                         + "ORDER BY v.id";
 
         try (PreparedStatement ps = conexion.prepareStatement(sqlVentas);
              ResultSet rs = ps.executeQuery()) {

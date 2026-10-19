@@ -27,7 +27,7 @@ public class MarcaDAO {
 
     public List<Marca> listarTodas() throws SQLException {
         List<Marca> lista = new ArrayList<>();
-        String sql = "SELECT id, nombre FROM marca ORDER BY nombre";
+        String sql = "SELECT id, nombre FROM marca ORDER BY id";
         try (PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

@@ -51,7 +51,7 @@ public class EmpleadoDAO {
         List<Empleado> lista = new ArrayList<>();
         String sql = "SELECT p.id, p.nombre, p.identificacion, p.telefono, p.correo, e.tipo "
                    + "FROM persona p JOIN empleado e ON p.id = e.id "
-                   + "ORDER BY p.nombre";
+                   + "ORDER BY p.id";
         try (PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) lista.add(mapear(rs));

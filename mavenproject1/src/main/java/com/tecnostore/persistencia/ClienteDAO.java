@@ -52,7 +52,7 @@ public class ClienteDAO {
         List<Cliente> lista = new ArrayList<>();
         String sql = "SELECT p.id, p.nombre, p.identificacion, p.telefono, p.correo, c.rut "
                    + "FROM persona p JOIN cliente c ON p.id = c.id "
-                   + "ORDER BY p.nombre";
+                   + "ORDER BY p.id";
         try (PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) lista.add(mapear(rs));

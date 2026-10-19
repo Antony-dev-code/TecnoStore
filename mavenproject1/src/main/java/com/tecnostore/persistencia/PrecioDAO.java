@@ -28,7 +28,7 @@ public class PrecioDAO {
 
     public List<Precio> listarTodos() throws SQLException {
         List<Precio> lista = new ArrayList<>();
-        String sql = "SELECT id, nombre, valor FROM precio ORDER BY valor";
+        String sql = "SELECT id, nombre, valor FROM precio ORDER BY id";
         try (PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {

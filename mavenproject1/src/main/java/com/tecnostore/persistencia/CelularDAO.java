@@ -62,7 +62,7 @@ public class CelularDAO {
                    + "FROM celular c "
                    + "JOIN marca  m ON c.id_marca_fk  = m.id "
                    + "JOIN precio p ON c.id_precio_fk = p.id "
-                   + "ORDER BY m.nombre, c.modelo";
+                   + "ORDER BY c.id";
         try (PreparedStatement ps = conexion.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) lista.add(mapear(rs));
