@@ -6,10 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * EmpleadoDAO - acceso a las tablas persona + empleado.
- * Misma logica que ClienteDAO: primero inserta en persona, luego en empleado.
- */
+// Guarda y lee empleados de la base de datos.
 public class EmpleadoDAO {
 
     private final Connection conexion;
@@ -20,7 +17,6 @@ public class EmpleadoDAO {
         this.personaDAO = new PersonaDAO(conexion);
     }
 
-    /** Inserta en persona y luego en empleado. */
     public void insertar(Empleado empleado) throws SQLException {
         int id = personaDAO.insertar(empleado);
         empleado.setId(id);
@@ -32,7 +28,7 @@ public class EmpleadoDAO {
         }
     }
 
-    /** Busca un empleado por id con JOIN persona+empleado. */
+    // Busca un empleado por su id.
     public Empleado buscarPorId(int id) throws SQLException {
         String sql = "SELECT p.id, p.nombre, p.identificacion, p.telefono, p.correo, e.tipo "
                    + "FROM persona p JOIN empleado e ON p.id = e.id "
@@ -46,7 +42,6 @@ public class EmpleadoDAO {
         return null;
     }
 
-    /** Lista todos los empleados. */
     public List<Empleado> listarTodos() throws SQLException {
         List<Empleado> lista = new ArrayList<>();
         String sql = "SELECT p.id, p.nombre, p.identificacion, p.telefono, p.correo, e.tipo "

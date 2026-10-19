@@ -2,10 +2,7 @@ package com.tecnostore.modelo;
 
 import java.io.Serializable;
 
-/**
- * Representa la marca fabricante de un celular (ej: Samsung, Apple).
- * Se guarda en tabla separada para no repetir el nombre en cada celular.
- */
+// Una marca de celular, por ejemplo Samsung o Apple.
 public class Marca implements Serializable {
 
     private static final long serialVersionUID = 1L;

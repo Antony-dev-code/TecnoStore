@@ -1,0 +1,10 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+LOGIN_OK
+information_schema
+mysql
+performance_schema
+pizzeria_don_piccolo
+sys
+tecnostoreant
+test_s2
+vueloss2

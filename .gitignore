@@ -1,1 +1,8 @@
 /mavenproject1/target/
+
+# Credenciales locales de cada desarrollador (NO subir a git)
+config.local.properties
+**/config.local.properties
+
+# Reportes generados por el programa (binarios, se crean al usar la app)
+*.dat

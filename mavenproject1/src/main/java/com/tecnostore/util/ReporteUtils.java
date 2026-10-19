@@ -7,26 +7,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.*;
 
-/**
- * ReporteUtils - genera reportes usando Stream API y expresiones lambda.
- *
- * No hace consultas SQL: recibe listas ya cargadas desde los DAOs
- * y las procesa en memoria con Stream API (Modulo 6).
- *
- * Todas las tablas usan anchos fijos por columna para mantener alineacion.
- */
+// Arma los reportes a partir de listas ya cargadas.
 public class ReporteUtils {
 
     private ReporteUtils() {}
 
-    // Anchos fijos de columnas para cada reporte
     private static final int[] ANCHOS_STOCK = {4, 14, 22, 8, 7};
     private static final int[] ANCHOS_TOP   = {10, 36, 18};
     private static final int[] ANCHOS_MES   = {12, 22};
 
-    // -------------------------------------------------------------------------
-    // Reporte 1: Celulares con stock bajo (menos de 5 unidades)
-    // -------------------------------------------------------------------------
+    // Celulares con poco stock (menos de 5 unidades).
     public static void mostrarStockBajo(List<Celular> celulares) {
         ConsolaUtils.imprimirTitulo("REPORTE: STOCK BAJO (menos de 5 unidades)");
 
@@ -55,10 +45,7 @@ public class ReporteUtils {
         ConsolaUtils.imprimirEspacio();
     }
 
-    // -------------------------------------------------------------------------
-    // Reporte 2: Top N celulares mas vendidos (N = min(3, modelos con ventas))
-    // Empate: orden alfabetico por nombre del modelo
-    // -------------------------------------------------------------------------
+    // Los celulares mas vendidos.
     public static void mostrarTopMasVendidos(List<Venta> ventas) {
         ConsolaUtils.imprimirTitulo("REPORTE: TOP CELULARES MAS VENDIDOS");
 
@@ -101,9 +88,7 @@ public class ReporteUtils {
         ConsolaUtils.imprimirEspacio();
     }
 
-    // -------------------------------------------------------------------------
-    // Reporte 3: Ventas totales agrupadas por mes (formato MM/AAAA)
-    // -------------------------------------------------------------------------
+    // Cuanto se vendio en cada mes.
     public static void mostrarVentasPorMes(List<Venta> ventas) {
         ConsolaUtils.imprimirTitulo("REPORTE: VENTAS TOTALES POR MES");
 

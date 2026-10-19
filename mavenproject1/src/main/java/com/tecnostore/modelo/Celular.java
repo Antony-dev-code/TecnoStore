@@ -2,9 +2,7 @@ package com.tecnostore.modelo;
 
 import java.io.Serializable;
 
-/**
- * Representa un telefono celular en el inventario de TecnoStore.
- */
+// Un celular del inventario de la tienda.
 public class Celular implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -17,7 +15,6 @@ public class Celular implements Serializable {
     private Precio           precio;
     private int              stock;
 
-    /** Para cargar desde la base de datos (con id). */
     public Celular(int id, String modelo, Marca marca,
                    SistemaOperativo sistemaOperativo, CategoriaGama gama,
                    Precio precio, int stock) {
@@ -26,7 +23,6 @@ public class Celular implements Serializable {
         this.precio = precio; this.stock = stock;
     }
 
-    /** Para crear un celular nuevo (sin id). */
     public Celular(String modelo, Marca marca,
                    SistemaOperativo sistemaOperativo, CategoriaGama gama,
                    Precio precio, int stock) {

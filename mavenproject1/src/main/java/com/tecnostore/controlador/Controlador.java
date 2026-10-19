@@ -8,22 +8,8 @@ import com.tecnostore.util.ReporteUtils;
 import com.tecnostore.vista.Vista;
 import java.util.List;
 
-/**
- * Controlador - capa CONTROLADOR del patron MVC.
- *
- * RESPONSABILIDAD UNICA: coordinar el flujo de la aplicacion.
- *
- * Es el intermediario entre la Vista y el Modelo:
- *   1. Pide a la Vista que muestre menus y lea opciones del usuario
- *   2. Llama a los gestores (Modelo) para ejecutar la logica de negocio
- *   3. Pide a la Vista que muestre los resultados
- *
- * El Controlador NO imprime directamente (eso es tarea de la Vista)
- * ni contiene reglas de negocio (eso es tarea de los gestores).
- *
- * Recibe todas sus dependencias por el constructor (inyeccion de dependencias),
- * aplicando el Principio de Inversion de Dependencias (DIP de SOLID).
- */
+// Conecta los menus con el resto del programa: lee la opcion del usuario
+// y llama a quien corresponde.
 public class Controlador {
 
     private final Vista           vista;
@@ -53,9 +39,7 @@ public class Controlador {
         this.conexionDB      = conexionDB;
     }
 
-    // =========================================================================
-    // BUCLE PRINCIPAL
-    // =========================================================================
+    // Menu principal: se repite hasta que el usuario elige salir
     public void iniciar() {
         int opcion;
         do {
@@ -76,9 +60,7 @@ public class Controlador {
         vista.cerrar();
     }
 
-    // =========================================================================
-    // FLUJO DE CELULARES
-    // =========================================================================
+    // Celulares
     private void menuCelulares() {
         int opcion;
         do {
@@ -171,9 +153,7 @@ public class Controlador {
         }
     }
 
-    // =========================================================================
-    // FLUJO DE CLIENTES
-    // =========================================================================
+    // Clientes
     private void menuClientes() {
         int opcion;
         do {
@@ -195,7 +175,6 @@ public class Controlador {
         String ident  = vista.leerTexto("Numero de identificacion: ");
         String correo = vista.leerTexto("Correo electronico: ");
         String tel    = vista.leerTexto("Telefono (solo digitos): ");
-        // El gestor valida todos los campos y muestra errores si corresponde
         gestorClientes.registrarCliente(nombre, ident, correo, tel);
     }
 
@@ -209,16 +188,13 @@ public class Controlador {
         vista.mostrarDetalleCliente(c);
     }
 
-    // =========================================================================
-    // FLUJO DE VENTAS
-    // =========================================================================
+    // Ventas
     private void registrarVenta() {
         vista.mostrarTitulo("REGISTRAR VENTA");
 
         Empleado cajero = seleccionarEmpleado();
         if (cajero == null) return;
 
-        // Listar clientes (practico para pruebas)
         vista.mostrarTablaClientes(gestorClientes.listarTodos());
 
         String identCliente = "";
@@ -273,9 +249,7 @@ public class Controlador {
         }
     }
 
-    // =========================================================================
-    // FLUJO DE REPORTES
-    // =========================================================================
+    // Reportes
     private void menuReportes() {
         int opcion;
         do {
@@ -293,9 +267,7 @@ public class Controlador {
         } while (opcion != 6);
     }
 
-    // =========================================================================
-    // METODOS AUXILIARES
-    // =========================================================================
+    // Apoyos internos
     private List<Marca> obtenerMarcas() {
         try {
             return marcaDAO.listarTodas();

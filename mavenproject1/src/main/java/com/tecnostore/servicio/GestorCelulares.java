@@ -9,15 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * GestorCelulares - logica de negocio para el inventario de celulares.
- *
- * Esta clase NO tiene codigo SQL ni llamadas directas a la consola
- * dentro de la logica de negocio. Delega la BD a CelularDAO.
- *
- * Aplica el Principio de Responsabilidad Unica (SRP):
- * una sola razon para cambiar = las reglas de negocio de celulares.
- */
+// Maneja las operaciones del inventario de celulares.
 public class GestorCelulares {
 
     private final CelularDAO celularDAO;
@@ -26,10 +18,7 @@ public class GestorCelulares {
         this.celularDAO = celularDAO;
     }
 
-    /**
-     * Registra un celular nuevo en el inventario.
-     * Usa FactoryCelular para construir el objeto con validaciones incluidas.
-     */
+    // Agrega un celular nuevo al inventario.
     public void registrarCelular(String modelo, Marca marca,
                                   SistemaOperativo so, CategoriaGama gama,
                                   Precio precio, int stock) {
@@ -44,9 +33,7 @@ public class GestorCelulares {
         }
     }
 
-    /**
-     * Busca un celular por su id. Retorna null si no existe.
-     */
+    // Busca un celular por su id.
     public Celular buscarPorId(int id) {
         try {
             return celularDAO.buscarPorId(id);
@@ -56,9 +43,7 @@ public class GestorCelulares {
         }
     }
 
-    /**
-     * Retorna la lista completa de celulares. Retorna lista vacia si hay error.
-     */
+    // Devuelve todos los celulares.
     public List<Celular> listarTodos() {
         try {
             return celularDAO.listarTodos();
@@ -68,10 +53,7 @@ public class GestorCelulares {
         }
     }
 
-    /**
-     * Actualiza los datos de un celular existente.
-     * Lanza IllegalArgumentException si el id no existe.
-     */
+    // Cambia los datos de un celular que ya existe.
     public void actualizarCelular(int id, String modelo, Marca marca,
                                    SistemaOperativo so, CategoriaGama gama,
                                    Precio precio, int stock) {
@@ -80,7 +62,6 @@ public class GestorCelulares {
             if (existente == null) {
                 throw new IllegalArgumentException("Celular no encontrado con id: " + id);
             }
-            // Validar datos nuevos antes de actualizar
             Celular actualizado = FactoryCelular.crear(modelo, marca, so, gama, precio, stock);
             actualizado.setId(id);
             celularDAO.actualizar(actualizado);
@@ -92,10 +73,7 @@ public class GestorCelulares {
         }
     }
 
-    /**
-     * Elimina un celular por su id.
-     * Lanza IllegalArgumentException si el id no existe.
-     */
+    // Borra un celular por su id.
     public void eliminarCelular(int id) {
         try {
             Celular existente = celularDAO.buscarPorId(id);

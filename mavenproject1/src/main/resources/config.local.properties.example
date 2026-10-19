@@ -1,0 +1,15 @@
+# =============================================================
+# EJEMPLO de configuracion LOCAL (por desarrollador)
+# =============================================================
+# 1. Copia este archivo y renombralo quitando ".example":
+#        config.local.properties
+# 2. Cambia db.usuario y db.contrasena por TUS credenciales de MySQL.
+#
+# config.local.properties esta ignorado por git, asi que tus credenciales
+# NUNCA se suben al repositorio ni afectan a los demas.
+# =============================================================
+db.host=localhost
+db.puerto=3306
+db.nombre=TecnoStoreAnt
+db.usuario=root
+db.contrasena=TU_CONTRASENA_AQUI

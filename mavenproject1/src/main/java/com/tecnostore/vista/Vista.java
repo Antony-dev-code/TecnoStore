@@ -6,25 +6,12 @@ import com.tecnostore.util.Validador;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Vista - capa de PRESENTACION del patron MVC.
- *
- * RESPONSABILIDAD UNICA: mostrar informacion en pantalla y leer datos del teclado.
- *
- * Esta clase NO contiene logica de negocio ni acceso a base de datos.
- * No llama a los gestores ni a los DAOs. Solo imprime lo que el Controlador
- * le pide mostrar y devuelve lo que el usuario escribe.
- *
- * El Controlador es quien decide QUE mostrar; la Vista decide COMO mostrarlo.
- */
+// Todo lo que se muestra en pantalla y se lee del teclado.
 public class Vista {
 
     private final Scanner sc = new Scanner(System.in);
 
-    // =========================================================================
-    // MENUS (solo imprimen opciones)
-    // =========================================================================
-
+    // Menus
     public void mostrarBienvenida() {
         ConsolaUtils.imprimirTitulo("TECNOSTORE - SISTEMA DE GESTION");
         System.out.println("  Conectando a la base de datos...");
@@ -71,10 +58,7 @@ public class Vista {
         ConsolaUtils.imprimirLinea();
     }
 
-    // =========================================================================
-    // LECTURA DE TECLADO
-    // =========================================================================
-
+    // Lectura de teclado
     public int leerEntero(String prompt) {
         System.out.print("  " + prompt);
         try {
@@ -123,10 +107,7 @@ public class Vista {
         return sc.nextLine().trim().equalsIgnoreCase("s");
     }
 
-    // =========================================================================
-    // MENSAJES
-    // =========================================================================
-
+    // Mensajes
     public void mostrarExito(String mensaje)  { ConsolaUtils.imprimirExito(mensaje); }
     public void mostrarError(String mensaje)  { ConsolaUtils.imprimirError(mensaje); }
     public void mostrarAviso(String mensaje)  { ConsolaUtils.imprimirAviso(mensaje); }
@@ -137,11 +118,7 @@ public class Vista {
         ConsolaUtils.imprimirTitulo("Gracias por usar TecnoStore. Hasta pronto!");
     }
 
-    // =========================================================================
-    // FORMULARIOS DE ENTRADA (piden datos y los devuelven, sin procesarlos)
-    // =========================================================================
-
-    /** Pide el sistema operativo y lo devuelve. */
+    // Formularios: piden datos al usuario
     public SistemaOperativo pedirSistemaOperativo() {
         System.out.println("  Sistema operativo:");
         System.out.println("    1. ANDROID");
@@ -150,7 +127,6 @@ public class Vista {
         return (op == 2) ? SistemaOperativo.IOS : SistemaOperativo.ANDROID;
     }
 
-    /** Pide la gama y la devuelve. */
     public CategoriaGama pedirGama() {
         System.out.println("  Gama:");
         System.out.println("    1. ALTA");
@@ -164,10 +140,7 @@ public class Vista {
         };
     }
 
-    // =========================================================================
-    // LISTADOS Y TABLAS (reciben datos ya cargados y los muestran)
-    // =========================================================================
-
+    // Listados y tablas
     public void mostrarMarcas(List<Marca> marcas) {
         System.out.println("  Marcas disponibles:");
         marcas.forEach(m -> System.out.println("    " + m.getId() + ". " + m.getNombre()));
@@ -255,7 +228,6 @@ public class Vista {
         ConsolaUtils.imprimirComprobante(venta);
     }
 
-    /** Cierra el Scanner al terminar el programa. */
     public void cerrar() {
         sc.close();
     }

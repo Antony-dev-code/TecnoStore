@@ -1,10 +1,6 @@
 package com.tecnostore.modelo;
 
-/**
- * Sistema operativo del celular.
- * ANDROID - Samsung, Xiaomi, Motorola, Huawei, Google, Realme
- * IOS     - Apple (iPhone)
- */
+// El sistema del celular: Android o iOS.
 public enum SistemaOperativo {
     ANDROID,
     IOS

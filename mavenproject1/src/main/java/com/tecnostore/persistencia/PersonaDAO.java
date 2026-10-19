@@ -3,13 +3,7 @@ package com.tecnostore.persistencia;
 import com.tecnostore.modelo.Persona;
 import java.sql.*;
 
-/**
- * PersonaDAO - acceso a la tabla persona
- *
- * Los clientes y empleados comparten datos en la tabla persona.
- * Este DAO los inserta ahi primero y retorna el id generado,
- * para que ClienteDAO y EmpleadoDAO lo usen en sus tablas.
- */
+// Guarda los datos comunes de clientes y empleados.
 public class PersonaDAO {
 
     private final Connection conexion;
@@ -18,15 +12,11 @@ public class PersonaDAO {
         this.conexion = conexion;
     }
 
-    /**
-     * Inserta en la tabla persona y retorna el id AUTO_INCREMENT generado.
-     * Ese id luego se usa en cliente o empleado.
-     */
+    // Guarda la persona y devuelve el id que le quedo asignado.
     public int insertar(Persona persona) throws SQLException {
         String sql = "INSERT INTO persona (nombre, identificacion, telefono, correo) "
                    + "VALUES (?, ?, ?, ?)";
 
-        // RETURN_GENERATED_KEYS le dice a JDBC que queremos el id generado
         try (PreparedStatement ps = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, persona.getNombre());
             ps.setString(2, persona.getIdentificacion());
@@ -36,14 +26,14 @@ public class PersonaDAO {
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getInt(1); // retorna el id asignado por MySQL
+                    return rs.getInt(1);
                 }
             }
         }
         throw new SQLException("No se obtuvo el id generado para persona.");
     }
 
-    /** Busca una persona por su id. Retorna null si no existe. */
+    // Busca una persona por su id.
     public Persona buscarPorId(int id) throws SQLException {
         String sql = "SELECT id, nombre, identificacion, telefono, correo "
                    + "FROM persona WHERE id = ?";
@@ -58,7 +48,7 @@ public class PersonaDAO {
         return null;
     }
 
-    /** Busca una persona por su numero de identificacion. Retorna null si no existe. */
+    // Busca una persona por su identificacion.
     public Persona buscarPorIdentificacion(String identificacion) throws SQLException {
         String sql = "SELECT id, nombre, identificacion, telefono, correo "
                    + "FROM persona WHERE identificacion = ?";
@@ -73,9 +63,7 @@ public class PersonaDAO {
         return null;
     }
 
-    // Convierte una fila del ResultSet en un objeto Persona anonimo (solo para busquedas internas)
     private Persona mapear(ResultSet rs) throws SQLException {
-        // Persona es abstracta, usamos una clase anonima para el mapeo interno
         final int    id             = rs.getInt("id");
         final String nombre         = rs.getString("nombre");
         final String identificacion = rs.getString("identificacion");

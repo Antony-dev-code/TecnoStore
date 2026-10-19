@@ -8,13 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * GestorClientes - logica de negocio para el registro y consulta de clientes.
- *
- * Aplica el Principio de Responsabilidad Unica (SRP):
- * solo maneja las reglas de negocio de clientes.
- * El acceso a la BD lo delega a ClienteDAO.
- */
+// Maneja el registro y la consulta de clientes.
 public class GestorClientes {
 
     private final ClienteDAO clienteDAO;
@@ -23,18 +17,9 @@ public class GestorClientes {
         this.clienteDAO = clienteDAO;
     }
 
-    /**
-     * Registra un cliente nuevo despues de validar todos sus datos.
-     *
-     * Validaciones:
-     *   - Ninguno de los campos puede estar vacio
-     *   - Formato de correo valido
-     *   - Telefono de 7 a 15 digitos
-     *   - La identificacion no puede estar duplicada
-     */
+    // Registra un cliente nuevo revisando antes que los datos esten bien.
     public void registrarCliente(String nombre, String identificacion,
                                   String correo, String telefono) {
-        // Validar campos obligatorios
         if (!Validador.esTextoValido(nombre, 100)) {
             ConsolaUtils.imprimirError("El nombre no puede estar vacio (maximo 100 caracteres).");
             return;
@@ -53,7 +38,6 @@ public class GestorClientes {
         }
 
         try {
-            // Verificar que la identificacion no este duplicada
             if (clienteDAO.existeIdentificacion(identificacion)) {
                 ConsolaUtils.imprimirError("Ya existe un cliente con esa identificacion.");
                 return;
@@ -66,10 +50,7 @@ public class GestorClientes {
         }
     }
 
-    /**
-     * Busca un cliente por su numero de identificacion.
-     * Retorna null si no existe.
-     */
+    // Busca un cliente por su identificacion.
     public Cliente buscarPorIdentificacion(String identificacion) {
         try {
             return clienteDAO.buscarPorIdentificacion(identificacion);
@@ -79,9 +60,7 @@ public class GestorClientes {
         }
     }
 
-    /**
-     * Retorna la lista completa de clientes registrados.
-     */
+    // Devuelve todos los clientes.
     public List<Cliente> listarTodos() {
         try {
             return clienteDAO.listarTodos();

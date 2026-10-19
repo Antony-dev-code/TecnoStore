@@ -2,10 +2,7 @@ package com.tecnostore.modelo;
 
 import java.io.Serializable;
 
-/**
- * Representa el precio de un celular como entidad separada (normalizacion).
- * Ejemplo: nombre = "Precio iPhone 15 Pro", valor = 5299990.00
- */
+// El precio de un celular, con un nombre y su valor.
 public class Precio implements Serializable {
 
     private static final long serialVersionUID = 1L;

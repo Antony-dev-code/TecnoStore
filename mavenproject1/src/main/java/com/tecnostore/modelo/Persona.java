@@ -2,11 +2,7 @@ package com.tecnostore.modelo;
 
 import java.io.Serializable;
 
-/**
- * Clase base abstracta que representa a cualquier persona en el sistema.
- * Es abstracta: nunca se crea un objeto Persona directamente.
- * Siempre se crea un Cliente o un Empleado, que heredan de esta clase.
- */
+// Base comun para Cliente y Empleado.
 public abstract class Persona implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -17,7 +13,6 @@ public abstract class Persona implements Serializable {
     private String telefono;
     private String correo;
 
-    /** Constructor para cargar desde la base de datos (con id). */
     public Persona(int id, String nombre, String identificacion,
                    String telefono, String correo) {
         this.id             = id;
@@ -27,7 +22,6 @@ public abstract class Persona implements Serializable {
         this.correo         = correo;
     }
 
-    /** Constructor para crear una persona nueva (sin id todavia). */
     public Persona(String nombre, String identificacion,
                    String telefono, String correo) {
         this.nombre         = nombre;

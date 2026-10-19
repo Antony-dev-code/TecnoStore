@@ -2,56 +2,40 @@ package com.tecnostore.persistencia;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-/**
- * ConexionDB - Patron Singleton thread-safe
- *
- * Garantiza que solo exista UNA conexion a MySQL durante toda la ejecucion.
- *
- * Por que Singleton?
- * Abrir una conexion JDBC es costoso. Con Singleton la abrimos una sola vez
- * y la reutilizamos en toda la aplicacion.
- *
- * Por que synchronized?
- * Evita que dos hilos creen dos instancias al mismo tiempo.
- */
+// Abre una sola conexion a MySQL y la reutiliza en todo el programa.
+//
+// Cada persona pone su usuario y contrasena en su propio archivo
+// config.local.properties (que no se sube a git). Si no lo crea, se usan
+// los valores de config.properties o las variables de entorno.
+// Orden: variables de entorno, luego config.local.properties, luego config.properties.
 public class ConexionDB {
 
-    // La unica instancia (empieza en null)
     private static ConexionDB instancia = null;
-
-    // La conexion JDBC activa
     private Connection conexion;
 
-    // -------------------------------------------------------------------------
-    // Constructor PRIVADO: nadie puede hacer "new ConexionDB()" desde afuera
-    // -------------------------------------------------------------------------
     private ConexionDB() {
         try {
-            Properties props = new Properties();
-            InputStream input = getClass()
-                    .getClassLoader()
-                    .getResourceAsStream("config.properties");
+            Properties props = cargarConfiguracion();
 
-            if (input == null) {
+            String host       = valor(props, "db.host",       "DB_HOST",       "localhost");
+            String puerto     = valor(props, "db.puerto",     "DB_PUERTO",     "3306");
+            String nombre     = valor(props, "db.nombre",     "DB_NOMBRE",     "TecnoStoreAnt");
+            String usuario    = valor(props, "db.usuario",    "DB_USUARIO",    "root");
+            String contrasena = valor(props, "db.contrasena", "DB_CONTRASENA", "");
+
+            if (usuario == null || usuario.isBlank()) {
                 throw new RuntimeException(
-                    "No se encontro config.properties en el classpath. " +
-                    "Verifica que exista en src/main/resources/"
+                    "Falta el usuario de MySQL. Define db.usuario en " +
+                    "config.local.properties o la variable de entorno DB_USUARIO."
                 );
             }
-
-            props.load(input);
-            input.close();
-
-            String host       = props.getProperty("db.host");
-            String puerto     = props.getProperty("db.puerto");
-            String nombre     = props.getProperty("db.nombre");
-            String usuario    = props.getProperty("db.usuario");
-            String contrasena = props.getProperty("db.contrasena");
 
             String url = "jdbc:mysql://" + host + ":" + puerto + "/" + nombre
                     + "?useSSL=false"
@@ -63,20 +47,70 @@ public class ConexionDB {
 
         } catch (IOException e) {
             throw new RuntimeException(
-                "Error al leer config.properties: " + e.getMessage(), e
+                "Error al leer la configuracion de la base de datos: " + e.getMessage(), e
             );
         } catch (SQLException e) {
             throw new RuntimeException(
-                "No se pudo conectar a la base de datos. " +
-                "Verifica que MySQL este iniciado y que config.properties sea correcto. " +
-                "Causa: " + e.getMessage(), e
+                "No se pudo conectar a la base de datos.\n" +
+                "  - Verifica que MySQL este iniciado.\n" +
+                "  - Crea el archivo src/main/resources/config.local.properties con TU usuario\n" +
+                "    y TU contrasena de MySQL (copia config.properties como plantilla), o\n" +
+                "    define las variables de entorno DB_USUARIO y DB_CONTRASENA.\n" +
+                "  - Ejecuta el script sql/TecnoStoreAnt.sql para crear la base de datos.\n" +
+                "Causa tecnica: " + e.getMessage(), e
             );
         }
     }
 
-    // -------------------------------------------------------------------------
-    // getInstancia() - unico punto de acceso; synchronized = thread-safe
-    // -------------------------------------------------------------------------
+    // Junta los valores: primero la plantilla, luego el archivo local (que manda).
+    private Properties cargarConfiguracion() throws IOException {
+        Properties props = new Properties();
+
+        try (InputStream base = getClass()
+                .getClassLoader()
+                .getResourceAsStream("config.properties")) {
+            if (base != null) {
+                props.load(base);
+            }
+        }
+
+        try (InputStream local = getClass()
+                .getClassLoader()
+                .getResourceAsStream("config.local.properties")) {
+            if (local != null) {
+                props.load(local);
+            }
+        }
+
+        for (String ruta : new String[]{
+                "config.local.properties",
+                "src/main/resources/config.local.properties"}) {
+            Path p = Path.of(ruta);
+            if (Files.exists(p)) {
+                try (InputStream fs = Files.newInputStream(p)) {
+                    props.load(fs);
+                }
+            }
+        }
+
+        return props;
+    }
+
+    // Toma el valor de la variable de entorno; si no, del archivo; si no, el de reserva.
+    private String valor(Properties props, String claveArchivo,
+                         String claveEnv, String porDefecto) {
+        String env = System.getenv(claveEnv);
+        if (env != null && !env.isBlank()) {
+            return env.trim();
+        }
+        String prop = props.getProperty(claveArchivo);
+        if (prop != null && !prop.isBlank()) {
+            return prop.trim();
+        }
+        return porDefecto;
+    }
+
+    // Devuelve la conexion, creandola la primera vez que se pide.
     public static synchronized ConexionDB getInstancia() {
         if (instancia == null) {
             instancia = new ConexionDB();
@@ -84,16 +118,11 @@ public class ConexionDB {
         return instancia;
     }
 
-    // -------------------------------------------------------------------------
-    // getConexion() - retorna el Connection para usar en los DAOs
-    // -------------------------------------------------------------------------
     public Connection getConexion() {
         return conexion;
     }
 
-    // -------------------------------------------------------------------------
-    // cerrarConexion() - llamar desde Main cuando el usuario elija Salir
-    // -------------------------------------------------------------------------
+    // Se llama al salir del programa
     public void cerrarConexion() {
         if (conexion != null) {
             try {
@@ -106,9 +135,7 @@ public class ConexionDB {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // estaConectado() - verifica el estado antes de operar
-    // -------------------------------------------------------------------------
+    // Indica si la conexion sigue abierta
     public boolean estaConectado() {
         try {
             return conexion != null && !conexion.isClosed();

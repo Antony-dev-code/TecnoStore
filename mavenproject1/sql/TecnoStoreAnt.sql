@@ -1,16 +1,10 @@
--- =============================================================
--- TecnoStoreAnt.sql
--- Script de creacion de la base de datos TecnoStoreAnt
--- Sistema de Gestion TecnoStore - Java 21 + MySQL
--- Ejecutar en MySQL Workbench antes de iniciar el programa
--- =============================================================
+-- Crea la base de datos de TecnoStore con sus tablas y algunos datos de prueba.
+-- Hay que ejecutarlo antes de usar el programa.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- -------------------------------------------------------------
--- 1. Crear la base de datos
--- -------------------------------------------------------------
+-- La base de datos
 DROP DATABASE IF EXISTS TecnoStoreAnt;
 CREATE DATABASE TecnoStoreAnt
     CHARACTER SET utf8mb4
@@ -18,9 +12,7 @@ CREATE DATABASE TecnoStoreAnt
 
 USE TecnoStoreAnt;
 
--- -------------------------------------------------------------
--- 2. Tabla persona (base para cliente y empleado)
--- -------------------------------------------------------------
+-- Datos comunes de clientes y empleados
 CREATE TABLE persona (
     id             INT          NOT NULL AUTO_INCREMENT,
     nombre         VARCHAR(100) NOT NULL,
@@ -31,9 +23,7 @@ CREATE TABLE persona (
     UNIQUE KEY uq_persona_identificacion (identificacion)
 );
 
--- -------------------------------------------------------------
--- 3. Tabla empleado (hereda id de persona)
--- -------------------------------------------------------------
+-- Empleados
 CREATE TABLE empleado (
     id   INT                                        NOT NULL,
     tipo ENUM('CAJERO','BODEGUERO','ADMINISTRADOR') NOT NULL,
@@ -41,9 +31,7 @@ CREATE TABLE empleado (
     CONSTRAINT fk_empleado_persona FOREIGN KEY (id) REFERENCES persona (id)
 );
 
--- -------------------------------------------------------------
--- 4. Tabla cliente (hereda id de persona)
--- -------------------------------------------------------------
+-- Clientes
 CREATE TABLE cliente (
     id  INT         NOT NULL,
     rut VARCHAR(20) NULL,
@@ -51,9 +39,7 @@ CREATE TABLE cliente (
     CONSTRAINT fk_cliente_persona FOREIGN KEY (id) REFERENCES persona (id)
 );
 
--- -------------------------------------------------------------
--- 5. Tabla marca
--- -------------------------------------------------------------
+-- Marcas
 CREATE TABLE marca (
     id     INT          NOT NULL AUTO_INCREMENT,
     nombre VARCHAR(100) NOT NULL,
@@ -61,9 +47,7 @@ CREATE TABLE marca (
     UNIQUE KEY uq_marca_nombre (nombre)
 );
 
--- -------------------------------------------------------------
--- 6. Tabla precio
--- -------------------------------------------------------------
+-- Precios
 CREATE TABLE precio (
     id     INT            NOT NULL AUTO_INCREMENT,
     nombre VARCHAR(100)   NOT NULL,
@@ -71,9 +55,7 @@ CREATE TABLE precio (
     PRIMARY KEY (id)
 );
 
--- -------------------------------------------------------------
--- 7. Tabla celular
--- -------------------------------------------------------------
+-- Celulares
 CREATE TABLE celular (
     id                INT                        NOT NULL AUTO_INCREMENT,
     modelo            VARCHAR(100)               NOT NULL,
@@ -87,9 +69,7 @@ CREATE TABLE celular (
     CONSTRAINT fk_celular_precio FOREIGN KEY (id_precio_fk) REFERENCES precio (id)
 );
 
--- -------------------------------------------------------------
--- 8. Tabla venta
--- -------------------------------------------------------------
+-- Ventas
 CREATE TABLE venta (
     id             INT            NOT NULL AUTO_INCREMENT,
     id_cliente_fk  INT            NOT NULL,
@@ -101,9 +81,7 @@ CREATE TABLE venta (
     CONSTRAINT fk_venta_empleado FOREIGN KEY (id_empleado_fk) REFERENCES empleado (id)
 );
 
--- -------------------------------------------------------------
--- 9. Tabla detalle_venta
--- -------------------------------------------------------------
+-- Las lineas de cada venta
 CREATE TABLE detalle_venta (
     id            INT            NOT NULL AUTO_INCREMENT,
     id_venta_fk   INT            NOT NULL,
@@ -117,9 +95,7 @@ CREATE TABLE detalle_venta (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- =============================================================
--- DATOS DE PRUEBA
--- =============================================================
+-- Datos de prueba
 
 -- Empleados
 INSERT INTO persona (nombre, identificacion, telefono, correo) VALUES
@@ -203,7 +179,7 @@ INSERT INTO detalle_venta (id_venta_fk, id_celular_fk, cantidad, subtotal) VALUE
 UPDATE celular SET stock = 28 WHERE id = 2;
 UPDATE celular SET stock = 29 WHERE id = 5;
 
--- Verificacion final
+-- Revisar cuantos datos quedaron en cada tabla
 SELECT 'persona'       AS tabla, COUNT(*) AS registros FROM persona;
 SELECT 'empleado'      AS tabla, COUNT(*) AS registros FROM empleado;
 SELECT 'cliente'       AS tabla, COUNT(*) AS registros FROM cliente;

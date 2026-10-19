@@ -7,15 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ArchivoUtils - serializa y deserializa el reporte de ventas en archivo .dat
- *
- * Por que .dat y no .txt?
- * Guarda objetos Java completos usando serializacion binaria (ObjectOutputStream).
- * El archivo conserva el estado exacto de cada objeto Venta sin convertir a texto.
- *
- * Para leer el contenido usa leerReporte() o mostrarReporte().
- */
+// Guarda y lee el reporte de ventas en el archivo reporte_ventas.dat.
 public class ArchivoUtils {
 
     private static final String NOMBRE_ARCHIVO = "reporte_ventas.dat";
@@ -23,7 +15,7 @@ public class ArchivoUtils {
 
     private ArchivoUtils() {}
 
-    /** Genera el archivo reporte_ventas.dat serializando la lista de ventas. */
+    // Crea el archivo con las ventas que haya en ese momento
     public static void generarReporte(List<Venta> ventas) {
         File archivo = new File(NOMBRE_ARCHIVO);
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivo))) {
@@ -43,7 +35,7 @@ public class ArchivoUtils {
         }
     }
 
-    /** Lee y deserializa el archivo. Retorna lista vacia si no existe o hay error. */
+    // Lee el archivo. Si no existe o falla, devuelve una lista vacia
     @SuppressWarnings("unchecked")
     public static List<Venta> leerReporte() {
         File archivo = new File(NOMBRE_ARCHIVO);
@@ -62,7 +54,7 @@ public class ArchivoUtils {
         }
     }
 
-    /** Muestra el contenido del archivo .dat en consola con formato de tabla. */
+    // Muestra en pantalla lo que guarda el archivo
     public static void mostrarReporte() {
         List<Venta> ventas = leerReporte();
         ConsolaUtils.imprimirTitulo("REPORTE DE VENTAS - ARCHIVO SERIALIZADO");

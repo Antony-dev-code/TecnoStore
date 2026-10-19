@@ -2,11 +2,7 @@ package com.tecnostore.modelo;
 
 import java.io.Serializable;
 
-/**
- * Representa una linea dentro de una venta.
- * Ejemplo: 2 unidades de iPhone 15 Pro a 5.299.990 c/u = subtotal 10.599.980
- * Se guarda el precio en el momento de la compra para preservar el historial.
- */
+// Una linea de una venta: un celular, la cantidad y su subtotal.
 public class ItemVenta implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -16,14 +12,12 @@ public class ItemVenta implements Serializable {
     private int     cantidad;
     private double  subtotal;
 
-    /** Para crear un item nuevo: el subtotal se calcula automaticamente. */
     public ItemVenta(Celular celular, int cantidad) {
         this.celular  = celular;
         this.cantidad = cantidad;
         this.subtotal = Math.round(celular.getPrecio().getValor() * cantidad * 100.0) / 100.0;
     }
 
-    /** Para cargar desde la base de datos (subtotal ya calculado). */
     public ItemVenta(int id, Celular celular, int cantidad, double subtotal) {
         this.id = id; this.celular = celular;
         this.cantidad = cantidad; this.subtotal = subtotal;

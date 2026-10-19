@@ -5,11 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ClienteDAO - acceso a las tablas persona + cliente.
- * Al insertar, primero llama a PersonaDAO para obtener el id,
- * luego inserta ese id en la tabla cliente.
- */
+// Guarda y lee clientes de la base de datos.
 public class ClienteDAO {
 
     private final Connection conexion;
@@ -20,7 +16,6 @@ public class ClienteDAO {
         this.personaDAO = new PersonaDAO(conexion);
     }
 
-    /** Inserta en persona y luego en cliente. Asigna el id al objeto. */
     public void insertar(Cliente cliente) throws SQLException {
         int id = personaDAO.insertar(cliente);
         cliente.setId(id);
@@ -33,7 +28,7 @@ public class ClienteDAO {
         }
     }
 
-    /** Busca un cliente por identificacion con JOIN persona+cliente. */
+    // Busca un cliente por su identificacion.
     public Cliente buscarPorIdentificacion(String identificacion) throws SQLException {
         String sql = "SELECT p.id, p.nombre, p.identificacion, p.telefono, p.correo, c.rut "
                    + "FROM persona p JOIN cliente c ON p.id = c.id "
@@ -47,7 +42,6 @@ public class ClienteDAO {
         return null;
     }
 
-    /** Lista todos los clientes. */
     public List<Cliente> listarTodos() throws SQLException {
         List<Cliente> lista = new ArrayList<>();
         String sql = "SELECT p.id, p.nombre, p.identificacion, p.telefono, p.correo, c.rut "
@@ -60,7 +54,7 @@ public class ClienteDAO {
         return lista;
     }
 
-    /** Verifica si ya existe un cliente con esa identificacion. */
+    // Dice si ya hay un cliente con esa identificacion.
     public boolean existeIdentificacion(String identificacion) throws SQLException {
         String sql = "SELECT 1 FROM persona p JOIN cliente c ON p.id = c.id "
                    + "WHERE p.identificacion = ?";
@@ -79,7 +73,7 @@ public class ClienteDAO {
             rs.getString("identificacion"),
             rs.getString("telefono"),
             rs.getString("correo"),
-            rs.getString("rut")   // puede ser null
+            rs.getString("rut")   // puede venir vacio
         );
     }
 }

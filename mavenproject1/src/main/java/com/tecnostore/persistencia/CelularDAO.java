@@ -5,10 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * CelularDAO - acceso a la tabla celular.
- * Todos los SELECT hacen JOIN con marca y precio para obtener objetos completos.
- */
+// Guarda y lee celulares de la base de datos.
 public class CelularDAO {
 
     private final Connection conexion;
@@ -17,7 +14,7 @@ public class CelularDAO {
         this.conexion = conexion;
     }
 
-    /** Inserta un celular nuevo. Asigna el id generado al objeto. */
+    // Guarda un celular nuevo.
     public void insertar(Celular celular) throws SQLException {
         String sql = "INSERT INTO celular (modelo, id_marca_fk, sistema_operativo, gama, id_precio_fk, stock) "
                    + "VALUES (?, ?, ?, ?, ?, ?)";
@@ -35,7 +32,7 @@ public class CelularDAO {
         }
     }
 
-    /** Busca un celular por id con JOIN a marca y precio. Retorna null si no existe. */
+    // Busca un celular por su id.
     public Celular buscarPorId(int id) throws SQLException {
         String sql = "SELECT c.id, c.modelo, c.sistema_operativo, c.gama, c.stock, "
                    + "       m.id AS m_id, m.nombre AS m_nombre, "
@@ -53,7 +50,6 @@ public class CelularDAO {
         return null;
     }
 
-    /** Lista todos los celulares con sus datos de marca y precio. */
     public List<Celular> listarTodos() throws SQLException {
         List<Celular> lista = new ArrayList<>();
         String sql = "SELECT c.id, c.modelo, c.sistema_operativo, c.gama, c.stock, "
@@ -70,7 +66,7 @@ public class CelularDAO {
         return lista;
     }
 
-    /** Actualiza todos los campos de un celular existente. */
+    // Guarda los cambios de un celular que ya existe.
     public void actualizar(Celular celular) throws SQLException {
         String sql = "UPDATE celular SET modelo = ?, id_marca_fk = ?, sistema_operativo = ?, "
                    + "gama = ?, id_precio_fk = ?, stock = ? WHERE id = ?";
@@ -86,7 +82,7 @@ public class CelularDAO {
         }
     }
 
-    /** Elimina un celular por su id. */
+    // Borra un celular por su id.
     public void eliminar(int id) throws SQLException {
         String sql = "DELETE FROM celular WHERE id = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
@@ -95,11 +91,7 @@ public class CelularDAO {
         }
     }
 
-    /**
-     * Reduce el stock de un celular en la cantidad indicada.
-     * Usa "stock >= cantidad" en el WHERE para que MySQL no permita stock negativo.
-     * Si no se actualiza ninguna fila, lanza SQLException (stock insuficiente).
-     */
+    // Descuenta del stock la cantidad indicada. Si no alcanza, avisa con un error.
     public void actualizarStock(int idCelular, int cantidad) throws SQLException {
         String sql = "UPDATE celular SET stock = stock - ? WHERE id = ? AND stock >= ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
@@ -113,7 +105,6 @@ public class CelularDAO {
         }
     }
 
-    // Convierte una fila del ResultSet en un objeto Celular completo
     private Celular mapear(ResultSet rs) throws SQLException {
         Marca  marca  = new Marca (rs.getInt("m_id"), rs.getString("m_nombre"));
         Precio precio = new Precio(rs.getInt("p_id"), rs.getString("p_nombre"), rs.getDouble("p_valor"));

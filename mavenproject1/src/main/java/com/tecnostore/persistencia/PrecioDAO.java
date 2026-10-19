@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Acceso a la tabla precio. */
+// Guarda y lee precios de la base de datos.
 public class PrecioDAO {
 
     private final Connection conexion;

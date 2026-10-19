@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Acceso a la tabla marca. */
+// Guarda y lee marcas de la base de datos.
 public class MarcaDAO {
 
     private final Connection conexion;

@@ -6,13 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * VentaDAO - acceso a las tablas venta y detalle_venta.
- *
- * El metodo insertarConTransaccion() es el mas importante del sistema:
- * guarda la venta, sus items y actualiza el stock todo en UNA sola
- * transaccion. Si algo falla, hace rollback y no queda nada a medias.
- */
+// Guarda y lee ventas de la base de datos.
 public class VentaDAO {
 
     private final Connection conexion;
@@ -23,20 +17,12 @@ public class VentaDAO {
         this.celularDAO = new CelularDAO(conexion);
     }
 
-    /**
-     * Guarda una venta completa en una transaccion atomica.
-     *
-     * Pasos dentro de la transaccion:
-     * 1. Doble verificacion de stock (SELECT FOR UPDATE)
-     * 2. INSERT en venta
-     * 3. INSERT en detalle_venta por cada item
-     * 4. UPDATE stock por cada celular vendido
-     * 5. COMMIT si todo salio bien, ROLLBACK si algo fallo
-     */
+    // Guarda la venta, sus items y descuenta el stock de una sola vez.
+    // Si algo falla, no se guarda nada.
     public void insertarConTransaccion(Venta venta) throws SQLException {
         conexion.setAutoCommit(false);
         try {
-            // --- Paso 1: Doble verificacion de stock antes de confirmar ---
+            // Primero revisa que haya stock de cada celular.
             for (ItemVenta item : venta.getItems()) {
                 String sqlStock = "SELECT stock FROM celular WHERE id = ? FOR UPDATE";
                 try (PreparedStatement ps = conexion.prepareStatement(sqlStock)) {
@@ -54,7 +40,7 @@ public class VentaDAO {
                 }
             }
 
-            // --- Paso 2: INSERT en venta ---
+            // Guarda la venta.
             String sqlVenta = "INSERT INTO venta (id_cliente_fk, fecha, total, id_empleado_fk) "
                             + "VALUES (?, ?, ?, ?)";
             try (PreparedStatement ps = conexion.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
@@ -68,7 +54,7 @@ public class VentaDAO {
                 }
             }
 
-            // --- Paso 3 y 4: INSERT detalle + UPDATE stock por cada item ---
+            // Guarda cada item y le resta al stock.
             String sqlDetalle = "INSERT INTO detalle_venta (id_venta_fk, id_celular_fk, cantidad, subtotal) "
                               + "VALUES (?, ?, ?, ?)";
             try (PreparedStatement ps = conexion.prepareStatement(sqlDetalle)) {
@@ -79,25 +65,22 @@ public class VentaDAO {
                     ps.setDouble(4, item.getSubtotal());
                     ps.executeUpdate();
 
-                    // Actualizar stock (CelularDAO ya verifica que no quede negativo)
                     celularDAO.actualizarStock(item.getCelular().getId(), item.getCantidad());
                 }
             }
 
-            // --- Paso 5: Confirmar todo ---
+            // Todo bien, se confirma.
             conexion.commit();
 
         } catch (SQLException e) {
-            // Si algo fallo, deshacer todos los cambios
+            // Algo fallo: se deshacen los cambios.
             conexion.rollback();
-            throw e; // relanzar para que GestorVentas muestre el mensaje de error
+            throw e;
         } finally {
-            // Siempre restaurar el modo autocommit
             conexion.setAutoCommit(true);
         }
     }
 
-    /** Lista todas las ventas con sus items, cliente y empleado. */
     public List<Venta> listarTodas() throws SQLException {
         List<Venta> ventas = new ArrayList<>();
 
@@ -136,7 +119,6 @@ public class VentaDAO {
                     rs.getTimestamp("fecha").toLocalDateTime(),
                     rs.getDouble("total"));
 
-                // Cargar los items de esta venta
                 cargarItems(venta);
                 ventas.add(venta);
             }
@@ -144,7 +126,7 @@ public class VentaDAO {
         return ventas;
     }
 
-    /** Carga los items de detalle para una venta ya creada. */
+    // Carga los items de una venta.
     private void cargarItems(Venta venta) throws SQLException {
         String sql = "SELECT dv.id, dv.cantidad, dv.subtotal, "
                    + "       c.id AS cel_id, c.modelo, c.sistema_operativo, c.gama, c.stock, "

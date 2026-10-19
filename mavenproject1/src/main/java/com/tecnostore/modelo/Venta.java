@@ -5,10 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Representa una venta completa en TecnoStore.
- * Tiene un cliente, un empleado, una lista de items y el total con IVA.
- */
+// Una venta con su cliente, su empleado, los items y el total.
 public class Venta implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,7 +17,6 @@ public class Venta implements Serializable {
     private LocalDateTime   fecha;
     private double          total;
 
-    /** Para registrar una venta nueva (la fecha se asigna automaticamente). */
     public Venta(Cliente cliente, Empleado empleado, double total) {
         this.cliente  = cliente;
         this.empleado = empleado;
@@ -29,7 +25,6 @@ public class Venta implements Serializable {
         this.fecha    = LocalDateTime.now();
     }
 
-    /** Para cargar una venta desde la base de datos. */
     public Venta(int id, Cliente cliente, Empleado empleado,
                  List<ItemVenta> items, LocalDateTime fecha, double total) {
         this.id = id; this.cliente = cliente; this.empleado = empleado;
@@ -37,7 +32,6 @@ public class Venta implements Serializable {
         this.fecha = fecha; this.total = total;
     }
 
-    /** Agrega un item a la lista de la venta. */
     public void agregarItem(ItemVenta item) { this.items.add(item); }
 
     public int             getId()                            { return id; }

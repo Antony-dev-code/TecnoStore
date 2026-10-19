@@ -3,25 +3,14 @@ package com.tecnostore.util;
 import com.tecnostore.modelo.ItemVenta;
 import com.tecnostore.modelo.Venta;
 
-/**
- * ConsolaUtils - utilidad para dar formato estetico a la consola.
- *
- * Centraliza todo el formato visual: bordes, tablas, titulos y comprobantes.
- * Todos los metodos son estaticos. Uso: ConsolaUtils.imprimirTitulo("MENU")
- *
- * Las tablas usan ANCHOS FIJOS por columna: cada celda se rellena con espacios
- * o se trunca con "..." si el texto es mas largo que el ancho asignado.
- * Asi las columnas siempre quedan alineadas aunque los nombres sean largos.
- */
+// Da formato a lo que se muestra en pantalla: titulos, tablas y comprobantes.
 public class ConsolaUtils {
 
     private static final int ANCHO = 74;
 
     private ConsolaUtils() {}
 
-    // -------------------------------------------------------------------------
-    // Titulo enmarcado
-    // -------------------------------------------------------------------------
+    // Muestra un titulo dentro de un recuadro.
     public static void imprimirTitulo(String titulo) {
         String linea = "=".repeat(ANCHO);
         System.out.println();
@@ -30,34 +19,15 @@ public class ConsolaUtils {
         System.out.println(linea);
     }
 
-    // -------------------------------------------------------------------------
-    // Linea separadora simple
-    // -------------------------------------------------------------------------
     public static void imprimirLinea() {
         System.out.println("-".repeat(ANCHO));
     }
 
-    // -------------------------------------------------------------------------
-    // Linea en blanco
-    // -------------------------------------------------------------------------
     public static void imprimirEspacio() {
         System.out.println();
     }
 
-    // -------------------------------------------------------------------------
-    // TABLAS CON ANCHOS FIJOS
-    //
-    // Para imprimir una tabla:
-    //   1. Define un arreglo int[] con el ancho de cada columna
-    //   2. Llama a imprimirEncabezado(anchos, "COL1", "COL2", ...)
-    //   3. Por cada fila llama a imprimirFila(anchos, "val1", "val2", ...)
-    //
-    // Cada celda se ajusta EXACTAMENTE al ancho dado:
-    //   - Si el texto es mas corto, se rellena con espacios
-    //   - Si es mas largo, se corta y termina en "..."
-    // -------------------------------------------------------------------------
-
-    /** Imprime la fila de encabezado (en mayusculas) seguida de una linea. */
+    // Muestra la fila de titulos de una tabla.
     public static void imprimirEncabezado(int[] anchos, String... columnas) {
         imprimirFila(anchos, columnas);
         StringBuilder sb = new StringBuilder("+");
@@ -67,7 +37,7 @@ public class ConsolaUtils {
         System.out.println(sb.toString());
     }
 
-    /** Imprime una fila de datos con cada valor ajustado al ancho de su columna. */
+    // Muestra una fila de datos de una tabla.
     public static void imprimirFila(int[] anchos, String... valores) {
         StringBuilder sb = new StringBuilder("|");
         for (int i = 0; i < anchos.length; i++) {
@@ -77,11 +47,7 @@ public class ConsolaUtils {
         System.out.println(sb.toString());
     }
 
-    /**
-     * Ajusta un texto a un ancho exacto:
-     *   - Si es mas largo, lo corta y agrega "..." al final
-     *   - Si es mas corto, lo rellena con espacios a la derecha
-     */
+    // Deja el texto del largo justo: lo recorta si sobra o lo rellena si falta.
     private static String ajustar(String texto, int ancho) {
         if (texto == null) texto = "";
         if (texto.length() > ancho) {
@@ -91,9 +57,6 @@ public class ConsolaUtils {
         return String.format("%-" + ancho + "s", texto);
     }
 
-    // -------------------------------------------------------------------------
-    // Mensajes
-    // -------------------------------------------------------------------------
     public static void imprimirExito(String mensaje) {
         System.out.println();
         System.out.println("  [OK] " + mensaje);
@@ -112,9 +75,7 @@ public class ConsolaUtils {
         System.out.println();
     }
 
-    // -------------------------------------------------------------------------
-    // Comprobante de venta completo
-    // -------------------------------------------------------------------------
+    // Imprime el comprobante de una venta.
     public static void imprimirComprobante(Venta venta) {
         String linea = "=".repeat(ANCHO);
         String sep   = "-".repeat(ANCHO);
@@ -155,10 +116,6 @@ public class ConsolaUtils {
         System.out.println(linea);
         System.out.println();
     }
-
-    // -------------------------------------------------------------------------
-    // Metodos de apoyo
-    // -------------------------------------------------------------------------
 
     private static String centrar(String texto) {
         if (texto.length() >= ANCHO) return texto;
