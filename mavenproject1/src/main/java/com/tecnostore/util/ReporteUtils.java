@@ -123,6 +123,6 @@ public class ReporteUtils {
         double granTotal = ventas.stream().mapToDouble(Venta::getTotal).sum();
         ConsolaUtils.imprimirLinea();
         System.out.printf("  Gran total: %s%n", ConsolaUtils.formatearPrecio(granTotal));
-        ConsolaUtils.imprimirEspacio();
+        ConsolaUtils.imprimirEspacio(); 
     }
 }

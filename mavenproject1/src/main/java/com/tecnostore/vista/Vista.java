@@ -54,7 +54,8 @@ public class Vista {
         System.out.println("  3. Ventas totales por mes");
         System.out.println("  4. Generar archivo reporte_ventas.dat");
         System.out.println("  5. Ver reporte desde archivo .dat");
-        System.out.println("  6. Volver al menu principal");
+        System.out.println("  6. Reporte de ventas por marca");
+        System.out.println("  7. Volver al menu principal");
         ConsolaUtils.imprimirLinea();
     }
 

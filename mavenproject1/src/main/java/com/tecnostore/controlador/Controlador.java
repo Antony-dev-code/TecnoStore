@@ -261,10 +261,11 @@ public class Controlador {
                 case 3 -> ReporteUtils.mostrarVentasPorMes(gestorVentas.listarTodas());
                 case 4 -> ArchivoUtils.generarReporte(gestorVentas.listarTodas());
                 case 5 -> ArchivoUtils.mostrarReporte();
-                case 6 -> {}
+                case 6 -> ReporteVentas.generar(vista.leerTexto("Ingrese la marca: "));
+                case 7 -> {}
                 default -> vista.mostrarAviso("Opcion no valida.");
             }
-        } while (opcion != 6);
+        } while (opcion != 7);
     }
 
     // Apoyos internos
